@@ -31,8 +31,8 @@ class StochasticBanditTest:
             self.best_reward += rewards[self.best]
             self.run_trial(i, rewards) 
 
+        """
         for alg_dict in self.algorithm_dict:
-            print("Algorithm: {}, with regret {}".format(alg_dict["algorithm"].name, alg_dict["regret_list"][-1]))
             rgb = (np.random.random(), np.random.random(), np.random.random())
             plt.plot(alg_dict["regret_list"], label=alg_dict["algorithm"].name)    
 
@@ -42,6 +42,9 @@ class StochasticBanditTest:
         plt.xscale("log")
         plt.legend()
         plt.show()
+        """
+
+        return self.algorithm_dict
     
     def run_trial(self, trial, rewards):
         """ 
@@ -108,23 +111,32 @@ def main():
     T = 10000
     experiment_name = "trial_5"
     rewards, best = create_distribution(N, lambda: np.random.random(), lambda x: np.random.binomial(1,x))
+    average = 10
 
     rewards = [
-        lambda: np.random.normal(0.5),
-        lambda: np.random.normal(0.5),
-        lambda: np.random.normal(0.5),
-        lambda: np.random.normal(0.9),
-        lambda: np.random.normal(0.3),
-        lambda: np.random.normal(0.2),
-        lambda: np.random.normal(0.1),
-        lambda: np.random.normal(0.6),
-        lambda: np.random.normal(0.5),
-        lambda: np.random.normal(0.5),
+        lambda: np.random.binomial(1, 0.5),
+        lambda: np.random.binomial(1, 0.5),
+        lambda: np.random.binomial(1, 0.5),
+        lambda: np.random.binomial(1, 0.9),
+        lambda: np.random.binomial(1, 0.3),
+        lambda: np.random.binomial(1, 0.2),
+        lambda: np.random.binomial(1, 0.1),
+        lambda: np.random.binomial(1, 0.6),
+        lambda: np.random.binomial(1, 0.5),
+        lambda: np.random.binomial(1, 0.5),
     ]
     best = 3
 
     algorithms = create_algorithms(N, T)
-    test = StochasticBanditTest(N, T, algorithms, rewards, best, experiment_name)
-    test.run()
+    algorithm_regret = [0] * len(algorithms)
+    for i in range(average):
+        algorithms = create_algorithms(N, T)
+        test = StochasticBanditTest(N, T, algorithms, rewards, best, experiment_name)
+        a_dict = test.run()
+        for j,a in enumerate(a_dict):
+            algorithm_regret[j] += a["regret_list"][-1]
+    
+    for j,_ in enumerate(algorithms):
+        print("Algorithm: {}, with regret {}".format(algorithms[j].name, algorithm_regret[j]/average))
 
 main()
